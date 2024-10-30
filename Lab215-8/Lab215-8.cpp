@@ -41,6 +41,13 @@ int main()
     top.setStatic(true);
     world.AddPhysicsBody(top);
 
+    PhysicsRectangle left;
+    left.setSize(Vector2f(10, 600));
+    left.setCenter(Vector2f(5, 300));
+    left.setStatic(true);
+    world.AddPhysicsBody(left);
+
+
     Texture duckTex;
     LoadTex(duckTex, "images//duck.png");
     PhysicsShapeList<PhysicsSprite> ducks;
@@ -50,6 +57,19 @@ int main()
         int x = 50 + ((700 / 5) * i);
         Vector2f sz = duck.getSize();
         duck.setCenter(Vector2f(x, 20 + (sz.y / 2)));
+        duck.setVelocity(Vector2f(-0.25, 0));
+        world.AddPhysicsBody(duck);
+        duck.onCollision =
+            [&drawingArrow, &world, &arrow, &duck, &ducks, &score]
+        (PhysicsBodyCollisionResult result) {
+            if (result.object2 == arrow) {
+                drawingArrow = false;
+                world.RemovePhysicsBody(arrow);
+                world.RemovePhysicsBody(duck);
+                ducks.QueueRemove(duck);
+                score += 10;
+            }
+        };
     }
 
 
@@ -89,6 +109,8 @@ int main()
             window.draw(crossBow);
             world.VisualizeAllBounds(window);
             window.display();
+            ducks.DoRemovals();
+
         }
     }
 
